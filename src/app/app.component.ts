@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Injector, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ApiService } from './api.service';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -21,9 +21,11 @@ export class AppComponent {
   )
 
   readonly api = inject(ApiService);
+  injector = inject(Injector);
 
   readonly primeFactors = toSignal(this.results$, {
-    initialValue: []
+    initialValue: [],
+    injector: this.injector
   });
 
   increase() {
@@ -35,8 +37,20 @@ export class AppComponent {
   }
 
   constructor() {
-    this.number$.subscribe(n => {
-      console.log('Number changed to', n);
-    })
+    /* this.number$.subscribe(n => console.log('Observable subscription 1', n));
+    setTimeout(() => {
+      console.log('Creating 2nd subscription');
+      this.number$.subscribe(n => console.log('Observable subscription 2', n));
+    }, 5000); */
+  }
+
+  ngOnInit(): void {
+    const s = toSignal(this.number$,
+      {
+        injector: this.injector
+      });
+    /*     const number2$ = toObservable(this.number); */
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
   }
 }
